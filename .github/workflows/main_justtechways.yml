@@ -11,8 +11,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Set up Java version
         uses: actions/setup-java@v1
@@ -23,10 +22,15 @@ jobs:
         run: mvn clean install
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: java-app
-          path: target/*.jar
+          path: '${{ github.workspace }}/target/*.jar'
+      
+      # Add a step to list the contents of the artifact directory
+      - name: List artifact contents
+        run: |
+          ls -la ${{ github.workspace }}/target
 
   deploy:
     runs-on: windows-latest
@@ -35,11 +39,11 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: java-app
       
